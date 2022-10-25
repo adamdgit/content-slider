@@ -45,7 +45,6 @@ header {
 
 .slider {
   display: flex;
-  transform: translateX(-33%);
   transition: transform 250ms ease;
 }
 
@@ -56,6 +55,8 @@ header {
   width: 100%;
   padding: 0 .5vw;
   font-size: .9rem;
+  transition: transform 200ms ease;
+  transform: translateX(-200%);
 }
 
 .slide-btn {
