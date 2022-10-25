@@ -2,11 +2,15 @@ const body = document.querySelector('body')
 const leftButton = document.querySelector('.slide-left')
 const rightButton = document.querySelector('.slide-right')
 const slider = document.querySelector('.slider')
-let slideIndex = 1 // decrease when clicking right, increase clicking left
-let carouselItems = slider.children.length
+let currentIndex = 0 // keep track of middle element
 let sectionSize = 3
+let carouselItems = slider.children.length
+let translateXValues = Array.from(Array(carouselItems)) // keep track of translate values
+// start images offset by 2 images (-200%), to hide edges of carousel where images
+// are being moved to/from to create the infinite loop effect
+translateXValues.fill(-200, 0, 10)
 
-// set default items on load
+// set default section size
 if (window.innerWidth < 800) {
   body.style.setProperty('--section-size', '2')
   sectionSize = 2
@@ -20,7 +24,7 @@ if (window.innerWidth >= 800) {
   sectionSize = 3
 }
 
-// change number of items when screen changes size
+// change section size when screen changes size
 window.addEventListener('resize', () => {
   if (window.innerWidth < 800) {
     body.style.setProperty('--section-size', '2')
@@ -36,62 +40,39 @@ window.addEventListener('resize', () => {
   }
 })
 
-// first and last section of images of the slider
-let rightImage = slider.children[slider.children.length -1]
-let leftImage2 = slider.children[1]
-let leftImage = slider.children[0]
-
-// place clones at start and end of carousel
-let clone = rightImage.cloneNode()
-slider.insertAdjacentElement('afterbegin', clone)
-clone = leftImage.cloneNode()
-slider.insertAdjacentElement('beforeend', clone)
-clone = leftImage2.cloneNode()
-slider.insertAdjacentElement('beforeend', clone)
-
-
 leftButton.addEventListener('pointerdown', () => {
-  console.log(slideIndex)
-  if(slideIndex === 1) {
-    slideIndex--
-    slider.style.transform = `translateX(${Math.round(slideIndex * -(100 / sectionSize))}%)`
-    const timer1 = setTimeout(() => {
-      slider.style.transition = 'unset'
-      slideIndex = carouselItems
-      slider.style.transform = `translateX(${Math.round(slideIndex * -(100 / sectionSize))}%)`
-      clearTimeout(timer1)
-    }, 310)
-    const timer2 = setTimeout(() => {
-      slider.style.transition = 'transform 300ms ease'
-      clearTimeout(timer2)
-    }, 320)
-    return
-  }
 
-  slideIndex--
-  slider.style.transform = `translateX(${Math.round(slideIndex * -(100 / sectionSize))}%)`
+  currentIndex--
+  if (currentIndex === -1) { currentIndex = carouselItems-1 }
+  let rightIndex = currentIndex % carouselItems
+
+  Array.from(slider.children).forEach((image, index) => {
+    image.style.opacity = '1'
+    image.style.transform = `translateX(${translateXValues[index] + 100}%)`
+    translateXValues[index] = translateXValues[index] + 100;
+  })
+
+  const rightImage = document.querySelectorAll('.slider img')[rightIndex]
+  rightImage.style.transform = `translateX(${translateXValues[rightIndex]-100*(carouselItems)}%)`
+  rightImage.style.opacity = '0'
+  translateXValues[rightIndex] = translateXValues[rightIndex]-100*(carouselItems);
 
 })
 
-
-
 rightButton.addEventListener('pointerdown', () => {
 
-  slideIndex++
-  if(slideIndex === carouselItems) {
-    slider.style.transform = `translateX(${Math.round(slideIndex * -(100 / sectionSize))}%)`
-    const timer1 = setTimeout(() => {
-      slider.style.transition = 'unset'
-      slideIndex = 0
-      slider.style.transform = `translateX(${Math.round(slideIndex * -(100 / sectionSize))}%)`
-      clearTimeout(timer1)
-    }, 270)
-    const timer2 = setTimeout(() => {
-      slider.style.transition = 'transform 300ms ease'
-      clearTimeout(timer2)
-    }, 290)
-    return
-  }
-  slider.style.transform = `translateX(${Math.round(slideIndex * -(100 / sectionSize))}%)`
+  currentIndex++
+  let leftIndex = (currentIndex-1) % carouselItems
+
+  Array.from(slider.children).forEach((image, index) => {
+    image.style.opacity = '1'
+    image.style.transform = `translateX(${translateXValues[index] - 100}%)`
+    translateXValues[index] = translateXValues[index] - 100;
+  })
+
+  const leftImage = document.querySelectorAll('.slider img')[leftIndex]
+  leftImage.style.transform = `translateX(${translateXValues[leftIndex]+100*(carouselItems)}%)`
+  leftImage.style.opacity = '0'
+  translateXValues[leftIndex] = translateXValues[leftIndex]+100*(carouselItems);
 
 })
